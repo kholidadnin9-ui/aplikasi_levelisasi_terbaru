@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Levelisasi Siswa Kelas 2</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap');
+        
+        * {
+            font-family: 'Orbitron', monospace;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        
+        .container-fluid {
+            padding: 20px;
+        }
+        
+        .kelas-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: linear-gradient(145deg, #0d1117, #161b22);
+            border: 2px solid #30363d;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        .kelas-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 255, 255, 0.4);
+            border-color: #00ffff;
+        }
+        .kelas-card.active {
+            border: 2px solid #ff00ff;
+            background: linear-gradient(145deg, #1a0f2e, #26115e);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.6);
+        }
+        .kelas-card h5 {
+            color: #ffffff !important;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            font-size: 1.5rem;
+        }
+        .kelas-card p {
+            color: #00ffff !important;
+            font-weight: 600;
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
+            font-size: 1.1rem;
+            margin-bottom: 0;
+        }
+        .student-row {
+            transition: all 0.3s ease;
+        }
+        .student-row:hover {
+            background-color: rgba(0, 255, 255, 0.1);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+            background: rgba(13, 17, 23, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #30363d;
+        }
+        .chart-container h6 {
+            color: #00ffff !important;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        .progress-badge {
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: #ffffff !important;
+        }
+        .level-1 { 
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+        }
+        .level-2 { 
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            box-shadow: 0 0 10px rgba(245, 87, 108, 0.5);
+        }
+        .level-3 { 
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            box-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+        }
+        .guru-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+        .header-section {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            padding: 40px 0;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="none"/><path d="M0 0 L100 100 M100 0 L0 100" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></svg>');
+            opacity: 0.5;
+        }
+        .header-section h1 {
+            color: #ffffff !important;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            font-weight: 900;
+        }
+        .header-section p {
+            color: #00ffff !important;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+            font-weight: 600;
+        }
+        .stats-card {
+            border-radius: 15px;
+            background: linear-gradient(145deg, #0d1117, #161b22);
+            border: 2px solid #30363d;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+        .stats-card:hover::before {
+            animation: shine 0.5s ease-in-out;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 255, 255, 0.3);
+            border-color: #00ffff;
+        }
+        .stats-card h5 {
+            color: #00ffff !important;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+        .stats-card h2 {
+            color: #ffffff !important;
+            font-weight: 900;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .action-buttons button {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 20px;
+            border: none;
+            transition: all 0.3s ease;
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+        .edit-row {
+            background-color: rgba(255, 193, 7, 0.1) !important;
+            border-left: 4px solid #ffc107;
+        }
+        .edit-input {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #ffc107;
+            color: #ffffff;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        .filter-section {
+            background: linear-gradient(145deg, #0d1117, #161b22);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #30363d;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        .filter-section h6 {
+            color: #00ffff !important;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+        .filter-section label {
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+        .filter-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border: 1px solid transparent;
+            color: #ffffff !important;
+        }
+        .filter-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        .filter-badge.active {
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.7);
+            transform: scale(1.1);
+        }
+        .filter-level-1 { 
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            border-color: #00d2ff;
+        }
+        .filter-level-2 { 
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            border-color: #f093fb;
+        }
+        .filter-level-3 { 
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            border-color: #4facfe;
+        }
+        .filter-all { 
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+        .result-section {
+            background: linear-gradient(145deg, #0d1117, #161b22);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 15px;
+            display: none;
+            border: 2px solid #30363d;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        .result-section h6 {
+            color: #00ffff !important;
+            font-weight: 700;
+        }
+        .result-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .result-item {
+            padding: 10px 15px;
+            margin: 5px 0;
+            background: linear-gradient(145deg, #0f3460, #16213e);
+            border-radius: 10px;
+            border-left: 4px solid #00ffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            color: #ffffff !important;
+        }
+        .result-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 12px rgba(0, 255, 255, 0.4);
+        }
+        .master-filter-section {
+            background: linear-gradient(145deg, #0d1117, #161b22);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border: 2px solid #30363d;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        .master-filter-title {
+            color: #00ffff !important;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+        .master-filter-section label {
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+        .master-result-section {
+            background: linear-gradient(145deg, #0d1117, #161b22);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 15px;
+            display: none;
+            border: 2px solid #30363d;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        .master-result-section h6 {
+            color: #00ffff !important;
+            font-weight: 700;
+        }
+        .master-result-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        .master-result-item {
+            padding: 12px 20px;
+            margin: 8px 0;
+            background: linear-gradient(145deg, #0f3460, #16213e);
+            border-radius: 12px;
+            border-left: 5px solid #00ffff;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            color: #ffffff !important;
+        }
+        .master-result-item:hover {
+            transform: translateX(8px);
+            box-shadow: 0 8px 16px rgba(0, 255, 255, 0.5);
+        }
+        .master-result-item .kelas-badge {
+            float: right;
+            font-weight: bold;
+        }
+        .login-section {
+            background: linear-gradient(145deg, #0d1117, #161b22);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px solid #30363d;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        .login-section h5 {
+            color: #00ffff !important;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+        .user-info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 12px 25px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-left: 20px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
+            border: 1px solid #667eea;
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+        .admin-only {
+            display: none;
+        }
+        .guru-only {
+            display: none;
+        }
+        .transfer-section {
+            background: linear-gradient(145deg, #0d1117, #161b22);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border: 2px solid #ffc107;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        .transfer-section h6 {
+            color: #ffc107 !important;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+        }
+        .transfer-form {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .transfer-form span {
+            color: #ffffff !important;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .transfer-result {
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(145deg, #0f3460, #16213e);
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            color: #ffffff !important;
+        }
+        
+        /* Card Styling */
+        .card {
+            background: linear-gradient(145deg, #0d1117, #161b22);
+            border: 2px solid #30363d;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .card-header {
+            border-bottom: 2px solid #30363d;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ffffff !important;
+        }
+        
+        .card-header.bg-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2) !important;
+            border-color: #667eea;
+        }
+        
+        .card-header.bg-info {
+            background: linear-gradient(135deg, #00d2ff, #3a7bd5) !important;
+            border-color: #00d2ff;
+        }
+        
+        .card-header.bg-warning {
+            background: linear-gradient(135deg, #f093fb, #f5576c) !important;
+            border-color: #f093fb;
+        }
+        
+        .card-header.bg-success {
+            background: linear-gradient(135deg, #4facfe, #00f2fe) !important;
+            border-color: #4facfe;
+        }
+        
+        .card-header h5 {
+            color: #ffffff !important;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Form Styling */
+        .form-control, .form-select {
+            background: linear-gradient(145deg, #0f3460, #16213e);
+            border: 2px solid #30363d;
+            color: #ffffff;
+            border-radius: 10px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border-color: #00ffff;
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            font-weight: 600;
+        }
+        
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+        
+        /* Dropdown options styling */
+        .form-select option {
+            background: linear-gradient(145deg, #0f3460, #16213e);
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        /* Button Styling */
+        .btn {
+            border-radius: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 8px 20px;
+            border: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            color: #ffffff !important;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.5);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.7);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.5);
+        }
+        
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.7);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f5576c, #f093fb);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.5);
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.7);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.7);
+        }
+        
+        .btn-outline-light {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: #ffffff !important;
+            font-weight: 600;
+        }
+        
+        .btn-outline-light:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #ffffff;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.5);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.7);
+        }
+        
+        /* Table Styling */
+        .table {
+            color: #ffffff;
+        }
+        
+        .table-striped > tbody > tr:nth-of-type(odd) > td,
+        .table-striped > tbody > tr:nth-of-type(odd) > th {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        .table thead th {
+            border-bottom: 2px solid #30363d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            color: #00ffff !important;
+        }
+        
+        .table td, .table th {
+            border-color: #30363d;
+            padding: 12px;
+            font-weight: 600;
+        }
+        
+        /* Badge Styling */
+        .badge {
+            border-radius: 15px;
+            padding: 5px 12px;
+            font-weight: 600;
+            color: #ffffff !important;
+        }
+        
+        /* Alert Styling */
+        .alert {
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: #ffffff !important;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: #ffffff !important;
+        }
+        
+        /* Small text styling */
+        small {
+            color: #00ffff !important;
+            font-weight: 500;
+        }
+        
+        .text-muted {
+            color: #00ffff !important;
+            font-weight: 500;
+        }
+        
+        /* Glow Effect */
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+            }
+            to {
+                text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff, 0 0 40px #00ffff;
+            }
+        }
+        
+        /* Chart title styling */
+        .chart-title {
+            color: #00ffff !important;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+            font-size: 1.3rem;
+            text-align: center;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Guru name styling - YELLOW */
+        .guru-name {
+            color: #ffeb3b !important;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 235, 59, 0.8);
+        }
+        
+        /* Dropdown options styling */
+        .form-select option {
+            background: linear-gradient(145deg, #0f3460, #16213e);
+            color: #ffffff;
+            font-weight: 600;
+        }
+        
+        .form-select option.guru-option {
+            color: #ffeb3b !important;
+            font-weight: 700;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-section h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stats-card h2 {
+                font-size: 1.5rem;
+            }
+            
+            .kelas-card h5 {
+                font-size: 1.2rem;
+            }
+            
+            .kelas-card p {
+                font-size: 1rem;
+            }
+            
+            .login-section h5 {
+                font-size: 1.1rem;
+            }
+            
+            .chart-title {
+                font-size: 1.1rem;
+            }
+            
+            .transfer-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="mb-0 glow"><i class="bi bi-mortarboard-fill me-2"></i>Aplikasi Levelisasi Siswa Kelas 2</h1>
+                        <p class="mb-0 mt-2">Sistem Manajemen Level dan Pembimbing Siswa</p>
+                    </div>
+                    <div class="user-info">
+                        <i class="bi bi-person-circle me-2"></i>
+                        <span id="currentUser">Admin</span>
+                        <button class="btn btn-sm btn-outline-light ms-3" onclick="logout()">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Login Section -->
+            <div class="login-section" id="loginSection">
+                <h5><i class="bi bi-person-check me-2"></i>Login sebagai:</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <select class="form-select" id="userSelect" onchange="login()">
+                            <option value="" style="color: #ffffff !important; font-weight: 600;">Pilih Pengguna</option>
+                            <option value="admin" style="color: #ffffff !important; font-weight: 600;">Admin</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <div id="guruSelectContainer" style="display: none;">
+                            <select class="form-select" id="guruSelect" onchange="login()">
+                                <option value="" style="color: #ffffff !important; font-weight: 600;">Pilih Guru</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card stats-card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title"><i class="bi bi-people-fill text-primary"></i> Total Siswa</h5>
+                            <h2 id="totalSiswa" class="glow">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stats-card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title"><i class="bi bi-person-workspace text-success"></i> Total Guru</h5>
+                            <h2 id="totalGuru" class="glow">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stats-card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title"><i class="bi bi-bar-chart-line text-warning"></i> Level Rata-rata</h5>
+                            <h2 id="avgLevel" class="glow">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card stats-card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title"><i class="bi bi-check-circle-fill text-info"></i> Siswa Terlevelisasi</h5>
+                            <h2 id="percentTerlevelisasi" class="glow">0%</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Master Data Guru (Admin Only) -->
+            <div class="card admin-only" id="masterGuruCard">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Master Data Guru Pembimbing</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" id="guruInput" class="form-control" placeholder="Nama Guru">
+                                <button class="btn btn-success" onclick="addGuru()"><i class="bi bi-plus-circle"></i> Tambah</button>
+                            </div>
+                            <small class="text-muted">Maksimal 12 guru</small>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Guru</th>
+                                    <th>Jumlah Siswa</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="guruTableBody">
+                                <!-- Data guru akan ditampilkan di sini -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Master Filter Section -->
+                    <div class="master-filter-section">
+                        <h5 class="master-filter-title"><i class="bi bi-funnel-fill me-2"></i>Filter Data Seluruh Siswa</h5>
+                        
+                        <!-- Filter Level Master -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Filter Level (Seluruh Kelas):</label>
+                            <div id="masterLevelFilters">
+                                <span class="filter-badge filter-all active" onclick="masterFilterByLevel('all')">
+                                    Semua Level (<span id="masterCountLevelAll">0</span>)
+                                </span>
+                                <span class="filter-badge filter-level-1" onclick="masterFilterByLevel(1)">
+                                    Level 1 (<span id="masterCountLevel1">0</span>)
+                                </span>
+                                <span class="filter-badge filter-level-2" onclick="masterFilterByLevel(2)">
+                                    Level 2 (<span id="masterCountLevel2">0</span>)
+                                </span>
+                                <span class="filter-badge filter-level-3" onclick="masterFilterByLevel(3)">
+                                    Level 3 (<span id="masterCountLevel3">0</span>)
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Filter Guru Master -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Filter Guru Pembimbing (Seluruh Kelas):</label>
+                            <select class="form-select" id="masterGuruFilter" onchange="masterFilterByGuru(this.value)">
+                                <option value="all">Semua Guru</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Hasil Filter Master -->
+                        <div class="master-result-section" id="masterFilterResult">
+                            <h6>Hasil Filter Seluruh Siswa:</h6>
+                            <div id="masterResultInfo"></div>
+                            <div class="master-result-list" id="masterResultList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pilihan Kelas -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-door-open me-2"></i>Pilih Kelas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3" id="kelasButtons">
+                        <!-- Tombol kelas akan dibuat di sini -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Siswa -->
+            <div class="card" id="siswaCard" style="display: none;">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-people me-2"></i>Data Siswa <span id="selectedKelas"></span></h5>
+                </div>
+                <div class="card-body">
+                    <!-- Filter Section -->
+                    <div class="filter-section">
+                        <h6><i class="bi bi-funnel me-2"></i>Filter Siswa</h6>
+                        
+                        <!-- Filter Level -->
+                        <div class="mb-3">
+                            <label class="form-label">Filter Level:</label>
+                            <div id="levelFilters">
+                                <span class="filter-badge filter-all active" onclick="filterByLevel('all')">
+                                    Semua Level (<span id="countLevelAll">0</span>)
+                                </span>
+                                <span class="filter-badge filter-level-1" onclick="filterByLevel(1)">
+                                    Level 1 (<span id="countLevel1">0</span>)
+                                </span>
+                                <span class="filter-badge filter-level-2" onclick="filterByLevel(2)">
+                                    Level 2 (<span id="countLevel2">0</span>)
+                                </span>
+                                <span class="filter-badge filter-level-3" onclick="filterByLevel(3)">
+                                    Level 3 (<span id="countLevel3">0</span>)
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Filter Guru -->
+                        <div class="mb-3">
+                            <label class="form-label">Filter Guru Pembimbing:</label>
+                            <select class="form-select" id="guruFilter" onchange="filterByGuru(this.value)">
+                                <option value="all">Semua Guru</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Hasil Filter -->
+                        <div class="result-section" id="filterResult">
+                            <h6>Hasil Filter:</h6>
+                            <div id="resultInfo"></div>
+                            <div class="result-list" id="resultList"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3 admin-only">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" id="siswaInput" class="form-control" placeholder="Nama Siswa">
+                                <button class="btn btn-success" onclick="addSiswa()"><i class="bi bi-plus-circle"></i> Tambah</button>
+                            </div>
+                            <small class="text-muted">Maksimal 30 siswa per kelas</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Transfer Section (Guru Only) -->
+                    <div class="transfer-section guru-only" id="transferSection">
+                        <h6><i class="bi bi-arrow-left-right me-2"></i>Transfer Siswa ke Guru Lain</h6>
+                        <div class="transfer-form">
+                            <select class="form-select" id="transferSiswaSelect">
+                                <option value="">Pilih Siswa</option>
+                            </select>
+                            <span class="fw-bold">→</span>
+                            <select class="form-select" id="transferGuruSelect">
+                                <option value="">Pilih Guru Baru</option>
+                            </select>
+                            <button class="btn btn-warning" onclick="transferSiswa()">
+                                <i class="bi bi-arrow-right-circle"></i> Transfer
+                            </button>
+                        </div>
+                        <div class="transfer-result" id="transferResult"></div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Siswa</th>
+                                    <th>Level</th>
+                                    <th>Guru Pembimbing</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="siswaTableBody">
+                                <!-- Data siswa akan ditampilkan di sini -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diagram Progress -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Diagram Progress Levelisasi</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h6 class="chart-title">Progress per Kelas</h6>
+                            <div class="chart-container">
+                                <canvas id="kelasChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h6 class="chart-title">Progress per Level</h6>
+                            <div class="chart-container">
+                                <canvas id="levelChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h6 class="chart-title">Progress per Guru Pembimbing</h6>
+                            <div class="chart-container">
+                                <canvas id="guruChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h6 class="chart-title">Progress Seluruh Kelas</h6>
+                            <div class="chart-container">
+                                <canvas id="allChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data global
+        let guruList = [];
+        let siswaList = [];
+        let selectedKelas = '';
+        let editingGuruIndex = -1; // Index guru yang sedang diedit
+        let editingGuruValue = ''; // Nilai sementara saat edit
+        let currentLevelFilter = 'all';
+        let currentGuruFilter = 'all';
+        let masterLevelFilter = 'all';
+        let masterGuruFilter = 'all';
+        let kelasChart, levelChart, guruChart, allChart;
+        let currentUser = null; // 'admin' atau nama guru
+        let userRole = null; // 'admin' atau 'guru'
+
+        // Inisialisasi data
+        function initData() {
+            // Cek localStorage
+            const savedGuru = localStorage.getItem('guruList');
+            const savedSiswa = localStorage.getItem('siswaList');
+            const savedUser = localStorage.getItem('currentUser');
+            
+            if (savedGuru) guruList = JSON.parse(savedGuru);
+            if (savedSiswa) siswaList = JSON.parse(savedSiswa);
+            if (savedUser) {
+                currentUser = savedUser;
+                userRole = savedUser === 'admin' ? 'admin' : 'guru';
+                updateUIForUser();
+            }
+            
+            // Jika kosong, isi data dummy
+            if (guruList.length === 0) {
+                guruList = [
+                    'Bu. Ani', 'Pak. Budi', 'Bu. Cici', 'Pak. Doni',
+                    'Bu. Eka', 'Pak. Fajar', 'Bu. Gina', 'Pak. Hendra',
+                    'Bu. Indah', 'Pak. Joko', 'Bu. Kiki', 'Pak. Leo'
+                ];
+                saveData();
+            }
+            
+            if (siswaList.length === 0) {
+                // Generate siswa dummy
+                const kelasOptions = ['2A', '2B', '2C', '2D', '2E', '2F'];
+                const levelOptions = [1, 2, 3];
+                
+                for (let k = 0; k < kelasOptions.length; k++) {
+                    const kelas = kelasOptions[k];
+                    const jumlahSiswa = Math.floor(Math.random() * 20) + 10; // 10-30 siswa
+                    
+                    for (let s = 0; s < jumlahSiswa; s++) {
+                        const nama = `Siswa ${kelas}-${s + 1}`;
+                        const level = levelOptions[Math.floor(Math.random() * levelOptions.length)];
+                        const guru = guruList[Math.floor(Math.random() * guruList.length)];
+                        
+                        siswaList.push({
+                            id: Date.now() + Math.random(),
+                            nama: nama,
+                            kelas: kelas,
+                            level: level,
+                            guru: guru
+                        });
+                    }
+                }
+                saveData();
+            }
+            
+            // Update login options
+            updateLoginOptions();
+            
+            renderKelasButtons();
+            renderGuruTable();
+            renderMasterGuruFilter();
+            updateStats();
+            renderCharts();
+            updateFilterCounts();
+            updateMasterFilterCounts();
+        }
+
+        // Update opsi login
+        function updateLoginOptions() {
+            const guruSelect = document.getElementById('guruSelect');
+            guruSelect.innerHTML = '<option value="" style="color: #ffffff !important; font-weight: 600;">Pilih Guru</option>';
+            
+            guruList.forEach(guru => {
+                const option = document.createElement('option');
+                option.value = guru;
+                option.textContent = guru;
+                option.style.color = '#ffeb3b !important';
+                option.style.fontWeight = '700';
+                option.className = 'guru-option';
+                guruSelect.appendChild(option);
+            });
+        }
+
+        // Login
+        function login() {
+            const userSelect = document.getElementById('userSelect');
+            const guruSelect = document.getElementById('guruSelect');
+            
+            if (userSelect.value === 'admin') {
+                currentUser = 'admin';
+                userRole = 'admin';
+            } else if (guruSelect.value) {
+                currentUser = guruSelect.value;
+                userRole = 'guru';
+            } else {
+                // Tampilkan pilihan guru jika admin dipilih
+                if (userSelect.value === 'admin') {
+                    document.getElementById('guruSelectContainer').style.display = 'block';
+                }
+                return;
+            }
+            
+            // Simpan ke localStorage
+            localStorage.setItem('currentUser', currentUser);
+            
+            // Update UI
+            updateUIForUser();
+            
+            // Sembunyikan section login
+            document.getElementById('loginSection').style.display = 'none';
+        }
+
+        // Update UI berdasarkan user
+        function updateUIForUser() {
+            // Update header
+            document.getElementById('currentUser').textContent = currentUser;
+            
+            // Tampilkan/sembunyikan elemen berdasarkan role
+            const adminElements = document.querySelectorAll('.admin-only');
+            const guruElements = document.querySelectorAll('.guru-only');
+            
+            if (userRole === 'admin') {
+                adminElements.forEach(el => el.style.display = 'block');
+                guruElements.forEach(el => el.style.display = 'none');
+            } else {
+                adminElements.forEach(el => el.style.display = 'none');
+                guruElements.forEach(el => el.style.display = 'block');
+            }
+            
+            // Jika guru, filter otomatis ke siswa bimbingannya
+            if (userRole === 'guru') {
+                // Reset filter
+                currentLevelFilter = 'all';
+                currentGuruFilter = currentUser;
+                
+                // Pilih kelas pertama yang memiliki siswa bimbingan
+                const kelasWithSiswa = [...new Set(
+                    siswaList
+                        .filter(s => s.guru === currentUser)
+                        .map(s => s.kelas)
+                )];
+                
+                if (kelasWithSiswa.length > 0) {
+                    selectKelas(kelasWithSiswa[0]);
+                }
+            }
+        }
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            userRole = null;
+            localStorage.removeItem('currentUser');
+            
+            // Reset UI
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('userSelect').value = '';
+            document.getElementById('guruSelect').value = '';
+            document.getElementById('guruSelectContainer').style.display = 'none';
+            document.getElementById('currentUser').textContent = 'Admin';
+            
+            // Sembunyikan semua fitur
+            document.querySelectorAll('.admin-only, .guru-only').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Sembunyikan card siswa
+            document.getElementById('siswaCard').style.display = 'none';
+        }
+
+        // Simpan data ke localStorage
+        function saveData() {
+            localStorage.setItem('guruList', JSON.stringify(guruList));
+            localStorage.setItem('siswaList', JSON.stringify(siswaList));
+        }
+
+        // Render tombol kelas
+        function renderKelasButtons() {
+            const container = document.getElementById('kelasButtons');
+            container.innerHTML = '';
+            
+            const kelasOptions = ['2A', '2B', '2C', '2D', '2E', '2F'];
+            
+            kelasOptions.forEach(kelas => {
+                let count;
+                if (userRole === 'guru') {
+                    count = siswaList.filter(s => s.kelas === kelas && s.guru === currentUser).length;
+                } else {
+                    count = siswaList.filter(s => s.kelas === kelas).length;
+                }
+                
+                const card = document.createElement('div');
+                card.className = 'col-md-2';
+                card.innerHTML = `
+                    <div class="card kelas-card text-center ${selectedKelas === kelas ? 'active' : ''}" 
+                         onclick="selectKelas('${kelas}')">
+                        <div class="card-body">
+                            <h5>${kelas}</h5>
+                            <p class="mb-0">${count} siswa</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Pilih kelas
+        function selectKelas(kelas) {
+            selectedKelas = kelas;
+            document.getElementById('selectedKelas').textContent = kelas;
+            document.getElementById('siswaCard').style.display = 'block';
+            
+            // Update active state
+            document.querySelectorAll('.kelas-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            renderSiswaTable();
+            renderGuruFilter();
+            updateFilterCounts();
+            
+            // Update transfer options jika guru
+            if (userRole === 'guru') {
+                updateTransferOptions();
+            }
+        }
+
+        // Update opsi transfer
+        function updateTransferOptions() {
+            const siswaSelect = document.getElementById('transferSiswaSelect');
+            const guruSelect = document.getElementById('transferGuruSelect');
+            
+            // Reset options
+            siswaSelect.innerHTML = '<option value="">Pilih Siswa</option>';
+            guruSelect.innerHTML = '<option value="">Pilih Guru Baru</option>';
+            
+            // Isi siswa bimbingan
+            const kelasSiswa = siswaList.filter(s => s.kelas === selectedKelas && s.guru === currentUser);
+            kelasSiswa.forEach(siswa => {
+                const option = document.createElement('option');
+                option.value = siswa.id;
+                option.textContent = `${siswa.nama} (Level ${siswa.level})`;
+                siswaSelect.appendChild(option);
+            });
+            
+            // Isi guru lain
+            guruList.forEach(guru => {
+                if (guru !== currentUser) {
+                    const option = document.createElement('option');
+                    option.value = guru;
+                    option.textContent = guru;
+                    option.style.color = '#ffeb3b !important';
+                    option.style.fontWeight = '700';
+                    option.className = 'guru-option';
+                    guruSelect.appendChild(option);
+                }
+            });
+        }
+
+        // Transfer siswa
+        function transferSiswa() {
+            const siswaId = document.getElementById('transferSiswaSelect').value;
+            const newGuru = document.getElementById('transferGuruSelect').value;
+            const resultDiv = document.getElementById('transferResult');
+            
+            if (!siswaId || !newGuru) {
+                resultDiv.innerHTML = '<div class="alert alert-warning">Silakan pilih siswa dan guru baru</div>';
+                resultDiv.style.display = 'block';
+                return;
+            }
+            
+            // Cari siswa
+            const siswa = siswaList.find(s => s.id == siswaId);
+            if (!siswa) return;
+            
+            // Update guru
+            const oldGuru = siswa.guru;
+            siswa.guru = newGuru;
+            
+            // Simpan
+            saveData();
+            
+            // Tampilkan hasil
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Berhasil transfer ${siswa.nama} dari <span class="guru-name">${oldGuru}</span> ke <span class="guru-name">${newGuru}</span>
+                </div>
+            `;
+            resultDiv.style.display = 'block';
+            
+            // Update UI
+            renderSiswaTable();
+            renderKelasButtons();
+            updateStats();
+            renderCharts();
+            updateFilterCounts();
+            updateMasterFilterCounts();
+            updateTransferOptions();
+            
+            // Reset form
+            document.getElementById('transferSiswaSelect').value = '';
+            document.getElementById('transferGuruSelect').value = '';
+        }
+
+        // Render tabel guru
+        function renderGuruTable() {
+            const tbody = document.getElementById('guruTableBody');
+            tbody.innerHTML = '';
+            
+            guruList.forEach((guru, index) => {
+                const count = siswaList.filter(s => s.guru === guru).length;
+                const row = document.createElement('tr');
+                
+                // Jika baris ini sedang diedit
+                if (editingGuruIndex === index) {
+                    row.className = 'edit-row';
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm edit-input" 
+                                   id="editGuruInput${index}" 
+                                   value="${editingGuruValue}" 
+                                   onkeypress="if(event.key==='Enter') saveGuru(${index})">
+                        </td>
+                        <td><span class="badge bg-primary">${count} siswa</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-success" onclick="saveGuru(${index})">
+                                    <i class="bi bi-check-circle"></i> Simpan
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="cancelEdit()">
+                                    <i class="bi bi-x-circle"></i> Batal
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td><span class="guru-name">${guru}</span></td>
+                        <td><span class="badge bg-primary">${count} siswa</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-warning" onclick="editGuru(${index})">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteGuru(${index})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                }
+                
+                tbody.appendChild(row);
+            });
+            
+            // Fokus ke input jika sedang edit
+            if (editingGuruIndex >= 0) {
+                setTimeout(() => {
+                    const input = document.getElementById(`editGuruInput${editingGuruIndex}`);
+                    if (input) {
+                        input.focus();
+                        input.select();
+                    }
+                }, 100);
+            }
+        }
+
+        // Render dropdown filter guru (master)
+        function renderMasterGuruFilter() {
+            const select = document.getElementById('masterGuruFilter');
+            select.innerHTML = '<option value="all">Semua Guru</option>';
+            
+            guruList.forEach(guru => {
+                const count = siswaList.filter(s => s.guru === guru).length;
+                const option = document.createElement('option');
+                option.value = guru;
+                option.innerHTML = `<span class="guru-name">${guru}</span> (${count} siswa)`;
+                option.style.color = '#ffeb3b !important';
+                option.style.fontWeight = '700';
+                option.className = 'guru-option';
+                select.appendChild(option);
+            });
+        }
+
+        // Render dropdown filter guru (kelas)
+        function renderGuruFilter() {
+            const select = document.getElementById('guruFilter');
+            select.innerHTML = '<option value="all">Semua Guru</option>';
+            
+            let filteredGuruList = guruList;
+            if (userRole === 'guru') {
+                filteredGuruList = [currentUser];
+            }
+            
+            filteredGuruList.forEach(guru => {
+                const count = siswaList.filter(s => s.guru === guru && s.kelas === selectedKelas).length;
+                const option = document.createElement('option');
+                option.value = guru;
+                option.innerHTML = `<span class="guru-name">${guru}</span> (${count} siswa)`;
+                option.style.color = '#ffeb3b !important';
+                option.style.fontWeight = '700';
+                option.className = 'guru-option';
+                select.appendChild(option);
+            });
+            
+            // Set filter otomatis untuk guru
+            if (userRole === 'guru') {
+                select.value = currentUser;
+                currentGuruFilter = currentUser;
+            }
+        }
+
+        // Update jumlah untuk filter level (kelas)
+        function updateFilterCounts() {
+            if (!selectedKelas) return;
+            
+            let kelasSiswa;
+            if (userRole === 'guru') {
+                kelasSiswa = siswaList.filter(s => s.kelas === selectedKelas && s.guru === currentUser);
+            } else {
+                kelasSiswa = siswaList.filter(s => s.kelas === selectedKelas);
+            }
+            
+            document.getElementById('countLevelAll').textContent = kelasSiswa.length;
+            document.getElementById('countLevel1').textContent = kelasSiswa.filter(s => s.level === 1).length;
+            document.getElementById('countLevel2').textContent = kelasSiswa.filter(s => s.level === 2).length;
+            document.getElementById('countLevel3').textContent = kelasSiswa.filter(s => s.level === 3).length;
+        }
+
+        // Update jumlah untuk filter level (master)
+        function updateMasterFilterCounts() {
+            document.getElementById('masterCountLevelAll').textContent = siswaList.length;
+            document.getElementById('masterCountLevel1').textContent = siswaList.filter(s => s.level === 1).length;
+            document.getElementById('masterCountLevel2').textContent = siswaList.filter(s => s.level === 2).length;
+            document.getElementById('masterCountLevel3').textContent = siswaList.filter(s => s.level === 3).length;
+        }
+
+        // Filter master berdasarkan level
+        function masterFilterByLevel(level) {
+            masterLevelFilter = level;
+            
+            // Update active state
+            document.querySelectorAll('#masterLevelFilters .filter-badge').forEach(badge => {
+                badge.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            applyMasterFilter();
+        }
+
+        // Filter master berdasarkan guru
+        function masterFilterByGuru(guru) {
+            masterGuruFilter = guru;
+            applyMasterFilter();
+        }
+
+        // Terapkan filter master
+        function applyMasterFilter() {
+            let filtered = [...siswaList];
+            
+            // Filter level
+            if (masterLevelFilter !== 'all') {
+                filtered = filtered.filter(s => s.level === masterLevelFilter);
+            }
+            
+            // Filter guru
+            if (masterGuruFilter !== 'all') {
+                filtered = filtered.filter(s => s.guru === masterGuruFilter);
+            }
+            
+            // Tampilkan hasil
+            displayMasterFilterResult(filtered);
+        }
+
+        // Tampilkan hasil filter master
+        function displayMasterFilterResult(filtered) {
+            const resultSection = document.getElementById('masterFilterResult');
+            const resultInfo = document.getElementById('masterResultInfo');
+            const resultList = document.getElementById('masterResultList');
+            
+            if (filtered.length === 0) {
+                resultSection.style.display = 'none';
+                return;
+            }
+            
+            resultSection.style.display = 'block';
+            
+            // Info hasil
+            let infoText = `Ditemukan <strong>${filtered.length}</strong> siswa dari seluruh kelas`;
+            if (masterLevelFilter !== 'all') {
+                infoText += ` di Level ${masterLevelFilter}`;
+            }
+            if (masterGuruFilter !== 'all') {
+                infoText += ` dengan pembimbing <strong><span class="guru-name">${masterGuruFilter}</span></strong>`;
+            }
+            resultInfo.innerHTML = infoText;
+            
+            // Group by kelas
+            const groupedByKelas = {};
+            filtered.forEach(siswa => {
+                if (!groupedByKelas[siswa.kelas]) {
+                    groupedByKelas[siswa.kelas] = [];
+                }
+                groupedByKelas[siswa.kelas].push(siswa);
+            });
+            
+            // List nama siswa per kelas
+            resultList.innerHTML = '';
+            Object.keys(groupedByKelas).sort().forEach(kelas => {
+                const kelasHeader = document.createElement('div');
+                kelasHeader.className = 'mt-3 mb-2 fw-bold text-primary';
+                kelasHeader.innerHTML = `<i class="bi bi-door-open me-2"></i>Kelas ${kelas}`;
+                resultList.appendChild(kelasHeader);
+                
+                groupedByKelas[kelas].forEach(siswa => {
+                    const item = document.createElement('div');
+                    item.className = 'master-result-item';
+                    item.innerHTML = `
+                        <i class="bi bi-person-fill me-2"></i>
+                        ${siswa.nama}
+                        <span class="kelas-badge badge bg-info">${siswa.kelas}</span>
+                        <span class="float-end">
+                            <span class="badge level-${siswa.level}">Level ${siswa.level}</span>
+                        </span>
+                        <div class="mt-1">
+                            <small>Pembimbing: <span class="guru-name">${siswa.guru}</span></small>
+                        </div>
+                    `;
+                    resultList.appendChild(item);
+                });
+            });
+        }
+
+        // Filter berdasarkan level (kelas)
+        function filterByLevel(level) {
+            currentLevelFilter = level;
+            
+            // Update active state
+            document.querySelectorAll('#levelFilters .filter-badge').forEach(badge => {
+                badge.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            applyFilter();
+        }
+
+        // Filter berdasarkan guru (kelas)
+        function filterByGuru(guru) {
+            currentGuruFilter = guru;
+            applyFilter();
+        }
+
+        // Terapkan filter (kelas)
+        function applyFilter() {
+            if (!selectedKelas) return;
+            
+            let filtered;
+            if (userRole === 'guru') {
+                filtered = siswaList.filter(s => s.kelas === selectedKelas && s.guru === currentUser);
+            } else {
+                filtered = siswaList.filter(s => s.kelas === selectedKelas);
+            }
+            
+            // Filter level
+            if (currentLevelFilter !== 'all') {
+                filtered = filtered.filter(s => s.level === currentLevelFilter);
+            }
+            
+            // Filter guru
+            if (currentGuruFilter !== 'all') {
+                filtered = filtered.filter(s => s.guru === currentGuruFilter);
+            }
+            
+            // Tampilkan hasil
+            displayFilterResult(filtered);
+        }
+
+        // Tampilkan hasil filter (kelas)
+        function displayFilterResult(filtered) {
+            const resultSection = document.getElementById('filterResult');
+            const resultInfo = document.getElementById('resultInfo');
+            const resultList = document.getElementById('resultList');
+            
+            if (filtered.length === 0) {
+                resultSection.style.display = 'none';
+                return;
+            }
+            
+            resultSection.style.display = 'block';
+            
+            // Info hasil
+            let infoText = `Ditemukan <strong>${filtered.length}</strong> siswa`;
+            if (currentLevelFilter !== 'all') {
+                infoText += ` di Level ${currentLevelFilter}`;
+            }
+            if (currentGuruFilter !== 'all') {
+                infoText += ` dengan pembimbing <strong><span class="guru-name">${currentGuruFilter}</span></strong>`;
+            }
+            resultInfo.innerHTML = infoText;
+            
+            // List nama siswa
+            resultList.innerHTML = '';
+            filtered.forEach(siswa => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                item.innerHTML = `
+                    <i class="bi bi-person-fill me-2"></i>
+                    ${siswa.nama}
+                    <span class="float-end">
+                        <span class="badge level-${siswa.level}">Level ${siswa.level}</span>
+                    </span>
+                    <div class="mt-1">
+                        <small>Pembimbing: <span class="guru-name">${siswa.guru}</span></small>
+                    </div>
+                `;
+                resultList.appendChild(item);
+            });
+        }
+
+        // Render tabel siswa
+        function renderSiswaTable() {
+            const tbody = document.getElementById('siswaTableBody');
+            tbody.innerHTML = '';
+            
+            let filteredSiswa;
+            if (userRole === 'guru') {
+                filteredSiswa = siswaList.filter(s => s.kelas === selectedKelas && s.guru === currentUser);
+            } else {
+                filteredSiswa = siswaList.filter(s => s.kelas === selectedKelas);
+            }
+            
+            filteredSiswa.forEach((siswa, index) => {
+                const row = document.createElement('tr');
+                row.className = 'student-row';
+                
+                // Tentukan guru yang bisa dipilih
+                let guruOptions;
+                if (userRole === 'guru') {
+                    // Guru hanya bisa memilih dirinya sendiri atau guru lain untuk transfer
+                    guruOptions = guruList.map(guru => 
+                        `<option value="${guru}" ${siswa.guru === guru ? 'selected' : ''} class="${guru === siswa.guru ? 'guru-option' : ''}">${guru}</option>`
+                    ).join('');
+                } else {
+                    // Admin bisa memilih semua guru
+                    guruOptions = guruList.map(guru => 
+                        `<option value="${guru}" ${siswa.guru === guru ? 'selected' : ''} class="${guru === siswa.guru ? 'guru-option' : ''}">${guru}</option>`
+                    ).join('');
+                }
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm" 
+                               value="${siswa.nama}" 
+                               onchange="updateSiswa(${siswa.id}, 'nama', this.value)">
+                    </td>
+                    <td>
+                        <select class="form-select form-select-sm" 
+                                onchange="updateSiswa(${siswa.id}, 'level', this.value)">
+                            <option value="1" ${siswa.level == 1 ? 'selected' : ''}>Level 1</option>
+                            <option value="2" ${siswa.level == 2 ? 'selected' : ''}>Level 2</option>
+                            <option value="3" ${siswa.level == 3 ? 'selected' : ''}>Level 3</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-select form-select-sm" 
+                                onchange="updateSiswa(${siswa.id}, 'guru', this.value)">
+                            ${guruOptions}
+                        </select>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            ${userRole === 'admin' ? 
+                                `<button class="btn btn-sm btn-danger" onclick="deleteSiswa(${siswa.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>` : ''
+                            }
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Apply yellow color to guru names in dropdown
+            setTimeout(() => {
+                const guruOptions = document.querySelectorAll('#siswaTableBody select option.guru-option');
+                guruOptions.forEach(option => {
+                    option.style.color = '#ffeb3b';
+                    option.style.fontWeight = '700';
+                });
+            }, 100);
+        }
+
+        // Edit guru
+        function editGuru(index) {
+            editingGuruIndex = index;
+            editingGuruValue = guruList[index];
+            renderGuruTable();
+        }
+
+        // Simpan perubahan guru
+        function saveGuru(index) {
+            const input = document.getElementById(`editGuruInput${index}`);
+            const newName = input.value.trim();
+            
+            if (!newName) {
+                alert('Nama guru tidak boleh kosong');
+                return;
+            }
+            
+            // Cek apakah nama sudah ada (kecuali nama yang sama)
+            const existingIndex = guruList.findIndex(g => g === newName);
+            if (existingIndex >= 0 && existingIndex !== index) {
+                alert('Nama guru sudah ada');
+                return;
+            }
+            
+            const oldName = guruList[index];
+            guruList[index] = newName;
+            
+            // Update semua siswa yang menggunakan guru ini
+            siswaList.forEach(siswa => {
+                if (siswa.guru === oldName) {
+                    siswa.guru = newName;
+                }
+            });
+            
+            // Update current user jika yang diedit adalah user yang sedang login
+            if (currentUser === oldName) {
+                currentUser = newName;
+                localStorage.setItem('currentUser', currentUser);
+                document.getElementById('currentUser').textContent = currentUser;
+            }
+            
+            editingGuruIndex = -1;
+            editingGuruValue = '';
+            
+            saveData();
+            renderGuruTable();
+            renderSiswaTable();
+            renderGuruFilter();
+            renderMasterGuruFilter();
+            updateStats();
+            renderCharts();
+            updateFilterCounts();
+            updateMasterFilterCounts();
+            updateLoginOptions();
+        }
+
+        // Batal edit
+        function cancelEdit() {
+            editingGuruIndex = -1;
+            editingGuruValue = '';
+            renderGuruTable();
+        }
+
+        // Tambah guru
+        function addGuru() {
+            const input = document.getElementById('guruInput');
+            const nama = input.value.trim();
+            
+            if (!nama) {
+                alert('Nama guru tidak boleh kosong');
+                return;
+            }
+            
+            if (guruList.length >= 12) {
+                alert('Maksimal 12 guru pembimbing');
+                return;
+            }
+            
+            if (guruList.includes(nama)) {
+                alert('Nama guru sudah ada');
+                return;
+            }
+            
+            guruList.push(nama);
+            input.value = '';
+            saveData();
+            renderGuruTable();
+            renderSiswaTable();
+            renderGuruFilter();
+            renderMasterGuruFilter();
+            updateStats();
+            renderCharts();
+            updateFilterCounts();
+            updateMasterFilterCounts();
+            updateLoginOptions();
+        }
+
+        // Hapus guru
+        function deleteGuru(index) {
+            if (confirm('Apakah Anda yakin ingin menghapus guru ini?')) {
+                const guru = guruList[index];
+                
+                // Cek apakah guru masih memiliki siswa
+                const siswaCount = siswaList.filter(s => s.guru === guru).length;
+                if (siswaCount > 0) {
+                    alert(`Tidak dapat menghapus! Guru ini masih memiliki ${siswaCount} siswa`);
+                    return;
+                }
+                
+                guruList.splice(index, 1);
+                saveData();
+                renderGuruTable();
+                renderSiswaTable();
+                renderGuruFilter();
+                renderMasterGuruFilter();
+                updateStats();
+                renderCharts();
+                updateFilterCounts();
+                updateMasterFilterCounts();
+                updateLoginOptions();
+            }
+        }
+
+        // Tambah siswa
+        function addSiswa() {
+            const input = document.getElementById('siswaInput');
+            const nama = input.value.trim();
+            
+            if (!nama) {
+                alert('Nama siswa tidak boleh kosong');
+                return;
+            }
+            
+            const kelasSiswa = siswaList.filter(s => s.kelas === selectedKelas);
+            if (kelasSiswa.length >= 30) {
+                alert('Maksimal 30 siswa per kelas');
+                return;
+            }
+            
+            siswaList.push({
+                id: Date.now() + Math.random(),
+                nama: nama,
+                kelas: selectedKelas,
+                level: 1,
+                guru: guruList[0] || ''
+            });
+            
+            input.value = '';
+            saveData();
+            renderSiswaTable();
+            renderKelasButtons();
+            updateStats();
+            renderCharts();
+            updateFilterCounts();
+            updateMasterFilterCounts();
+        }
+
+        // Update siswa
+        function updateSiswa(id, field, value) {
+            const siswa = siswaList.find(s => s.id === id);
+            if (siswa) {
+                if (field === 'level') {
+                    siswa.level = parseInt(value);
+                } else if (field === 'guru') {
+                    siswa.guru = value;
+                } else {
+                    siswa[field] = value;
+                }
+                
+                saveData();
+                renderGuruTable();
+                updateStats();
+                renderCharts();
+                updateFilterCounts();
+                updateMasterFilterCounts();
+                
+                // Update transfer options jika guru
+                if (userRole === 'guru') {
+                    updateTransferOptions();
+                }
+                
+                // Re-apply yellow color to guru names
+                setTimeout(() => {
+                    const guruOptions = document.querySelectorAll('#siswaTableBody select option.guru-option');
+                    guruOptions.forEach(option => {
+                        option.style.color = '#ffeb3b';
+                        option.style.fontWeight = '700';
+                    });
+                }, 100);
+            }
+        }
+
+        // Hapus siswa
+        function deleteSiswa(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus siswa ini?')) {
+                siswaList = siswaList.filter(s => s.id !== id);
+                saveData();
+                renderSiswaTable();
+                renderKelasButtons();
+                updateStats();
+                renderCharts();
+                updateFilterCounts();
+                updateMasterFilterCounts();
+                
+                // Update transfer options jika guru
+                if (userRole === 'guru') {
+                    updateTransferOptions();
+                }
+            }
+        }
+
+        // Update statistik
+        function updateStats() {
+            let totalSiswa, totalGuru;
+            
+            if (userRole === 'guru') {
+                totalSiswa = siswaList.filter(s => s.guru === currentUser).length;
+                totalGuru = 1; // Hanya diri sendiri
+            } else {
+                totalSiswa = siswaList.length;
+                totalGuru = guruList.length;
+            }
+            
+            // Hitung level rata-rata
+            let filteredSiswa;
+            if (userRole === 'guru') {
+                filteredSiswa = siswaList.filter(s => s.guru === currentUser);
+            } else {
+                filteredSiswa = siswaList;
+            }
+            
+            const totalLevel = filteredSiswa.reduce((sum, s) => sum + s.level, 0);
+            const avgLevel = totalSiswa > 0 ? (totalLevel / totalSiswa).toFixed(1) : 0;
+            
+            // Hitung persentase siswa terlevelisasi (level > 1)
+            const terlevelisasi = filteredSiswa.filter(s => s.level > 1).length;
+            const percentTerlevelisasi = totalSiswa > 0 ? Math.round((terlevelisasi / totalSiswa) * 100) : 0;
+            
+            document.getElementById('totalSiswa').textContent = totalSiswa;
+            document.getElementById('totalGuru').textContent = totalGuru;
+            document.getElementById('avgLevel').textContent = avgLevel;
+            document.getElementById('percentTerlevelisasi').textContent = percentTerlevelisasi + '%';
+        }
+
+        // Render diagram
+        function renderCharts() {
+            // Data untuk diagram per kelas
+            const kelasData = {};
+            const kelasOptions = ['2A', '2B', '2C', '2D', '2E', '2F'];
+            
+            kelasOptions.forEach(kelas => {
+                if (userRole === 'guru') {
+                    kelasData[kelas] = siswaList.filter(s => s.kelas === kelas && s.guru === currentUser).length;
+                } else {
+                    kelasData[kelas] = siswaList.filter(s => s.kelas === kelas).length;
+                }
+            });
+            
+            // Data untuk diagram per level
+            let levelData;
+            if (userRole === 'guru') {
+                const filteredSiswa = siswaList.filter(s => s.guru === currentUser);
+                levelData = {
+                    'Level 1': filteredSiswa.filter(s => s.level === 1).length,
+                    'Level 2': filteredSiswa.filter(s => s.level === 2).length,
+                    'Level 3': filteredSiswa.filter(s => s.level === 3).length
+                };
+            } else {
+                levelData = {
+                    'Level 1': siswaList.filter(s => s.level === 1).length,
+                    'Level 2': siswaList.filter(s => s.level === 2).length,
+                    'Level 3': siswaList.filter(s => s.level === 3).length
+                };
+            }
+            
+            // Data untuk diagram per guru
+            const guruData = {};
+            if (userRole === 'guru') {
+                guruData[currentUser] = siswaList.filter(s => s.guru === currentUser).length;
+            } else {
+                guruList.forEach(guru => {
+                    guruData[guru] = siswaList.filter(s => s.guru === guru).length;
+                });
+            }
+            
+            // Data untuk diagram seluruh kelas
+            let allData;
+            if (userRole === 'guru') {
+                const filteredSiswa = siswaList.filter(s => s.guru === currentUser);
+                allData = {
+                    'Total Siswa': filteredSiswa.length,
+                    'Level 1': filteredSiswa.filter(s => s.level === 1).length,
+                    'Level 2': filteredSiswa.filter(s => s.level === 2).length,
+                    'Level 3': filteredSiswa.filter(s => s.level === 3).length
+                };
+            } else {
+                allData = {
+                    'Total Siswa': siswaList.length,
+                    'Level 1': siswaList.filter(s => s.level === 1).length,
+                    'Level 2': siswaList.filter(s => s.level === 2).length,
+                    'Level 3': siswaList.filter(s => s.level === 3).length
+                };
+            }
+            
+            // Hapus chart lama jika ada
+            if (kelasChart) kelasChart.destroy();
+            if (levelChart) levelChart.destroy();
+            if (guruChart) guruChart.destroy();
+            if (allChart) allChart.destroy();
+            
+            // Buat chart per kelas
+            const kelasCtx = document.getElementById('kelasChart').getContext('2d');
+            kelasChart = new Chart(kelasCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(kelasData),
+                    datasets: [{
+                        label: 'Jumlah Siswa',
+                        data: Object.values(kelasData),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)',
+                            'rgba(255, 159, 64, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false,
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((context.raw / total) * 100) : 0;
+                                    return `${context.raw} siswa (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Buat chart per level
+            const levelCtx = document.getElementById('levelChart').getContext('2d');
+            levelChart = new Chart(levelCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(levelData),
+                    datasets: [{
+                        label: 'Jumlah Siswa',
+                        data: Object.values(levelData),
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false,
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((context.raw / total) * 100) : 0;
+                                    return `${context.raw} siswa (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Buat chart per guru
+            const guruCtx = document.getElementById('guruChart').getContext('2d');
+            guruChart = new Chart(guruCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(guruData),
+                    datasets: [{
+                        label: 'Jumlah Siswa',
+                        data: Object.values(guruData),
+                        backgroundColor: 'rgba(153, 102, 255, 0.7)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false,
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((context.raw / total) * 100) : 0;
+                                    return `${context.raw} siswa (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Buat chart seluruh kelas
+            const allCtx = document.getElementById('allChart').getContext('2d');
+            allChart = new Chart(allCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(allData),
+                    datasets: [{
+                        label: 'Jumlah',
+                        data: Object.values(allData),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false,
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((context.raw / total) * 100) : 0;
+                                    return `${context.raw} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inisialisasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            initData();
+            
+            // Tampilkan login section jika belum login
+            if (!currentUser) {
+                document.getElementById('loginSection').style.display = 'block';
+            } else {
+                document.getElementById('loginSection').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
